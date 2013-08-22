@@ -1,0 +1,115 @@
+<script type="text/javascript">
+var faq_{{ instance }} = {};
+
+faq_{{ instance }}.get_number = function(tag) {
+    var id = $(tag).attr('id');
+    var regex = /([^-]+-)+{{ instance }}-([0-9]+)/;
+    var match = regex.exec(id);
+    return match[2];
+}
+
+faq_{{ instance }}.get_question = function(tag) {
+    var id = faq_{{ instance }}.get_number(tag)
+    return $('#faq-q-{{ instance }}-' + id);
+}
+
+faq_{{ instance }}.get_answer = function(tag) {
+    var id = faq_{{ instance }}.get_number(tag)
+    return $('#faq-a-{{ instance }}-' + id);
+}
+
+faq_{{ instance }}.get_current_question = function() {
+    var topic = $('#faq-topics-{{ instance }}').find('.selected').first();
+    var topic_num = faq_{{ instance }}.get_number(topic);
+    var questions = $('#faq-tqs-{{ instance }}-' + topic_num);
+    var question = $(questions.find('.selected').first());
+    return question;
+}
+
+faq_{{ instance }}.select_question = function(question_a) {
+    var old_question = faq_{{ instance }}.get_current_question();
+    old_question.removeClass('selected');
+    faq_{{ instance }}.get_answer(old_question).hide();
+    question = $(question_a).parent();
+    question.addClass('selected');
+    faq_{{ instance }}.get_answer(question).show();
+};
+
+faq_{{ instance }}.select_topic = function(topic_a) {
+    var topic = $(topic_a).parent();
+    var question = faq_{{ instance }}.get_current_question();
+    faq_{{ instance }}.get_answer(question).hide();
+    topic.siblings().each(function(index, sibling){
+        $(sibling).removeClass('selected');
+    });
+
+    topic.addClass('selected');
+
+    $('#faq-questions-{{ instance }}').children().each(function(index, child){
+        $(child).hide();
+    });
+    
+    var topic_num = faq_{{ instance }}.get_number(topic);
+    var questions = $('#faq-tqs-{{ instance }}-' + topic_num);
+    questions.show();
+    
+    questions.children().each(function(index, child){
+       if ($(child).hasClass('selected')) {
+            faq_{{ instance }}.get_answer(child).show();
+       };
+    });
+    
+}
+</script>
+{% load markup %}
+    <table id="faq-{{ instance }}" class="tri-column">
+      <tr class="column-headers">
+       <th>TOPICS</th>
+       <th>QUESTIONS</th>
+       <th>ANSWERS</th>
+      </tr>
+      <tr class="spacer-row"></tr>
+      <tr>
+       <td class="column">
+        <ul class="topic-list" id="faq-topics-{{ instance }}">
+        {% for topic in topics %}
+         {% if forloop.first %}
+          <li class="selected" id="faq-t-{{ instance }}-{{ topic.id }}"><a onclick="faq_{{instance}}.select_topic(this);return false;">{{ topic.name }}</a></li>
+         {% else %}
+          <li id="faq-t-{{ instance }}-{{ topic.id }}"><a onclick="faq_{{instance}}.select_topic(this);return false;">{{ topic.name }}</a></li>
+         {% endif %}
+        {% endfor %}
+        </ul>
+       </td>
+       <td class="column column-internal" id="faq-questions-{{ instance }}">
+        {% for topic in topics %}
+         {% if forloop.first %}
+         <ul class="subtopic-list" id="faq-tqs-{{ instance }}-{{ topic.id }}">
+         {% else %}
+         <ul class="subtopic-list" id="faq-tqs-{{ instance }}-{{ topic.id }}" style="display:none;">
+         {% endif %}
+         {% for question in topic.questions.all %}
+          {% if forloop.first %}
+           <li class="selected" id="faq-q-{{ instance}}-{{ question.id }}"><a onclick="faq_{{instance}}.select_question(this);return false;">{{ question.text }}</a></li>
+          {% else %}
+           <li id="faq-q-{{instance}}-{{ question.id }}"><a onclick="faq_{{instance}}.select_question(this);return false;">{{ question.text }}</a></li>
+          {% endif %}
+         {% endfor %}
+         </ul>
+        {% endfor %}
+       </td>
+       <td id="faq-answers-{{ instance }}" class="column answers">
+        {% for topic in topics %}
+         {% with forloop.first as first_topic %}
+          {% for question in topic.questions.all %}
+           {% if forloop.first and first_topic %}
+           <div id="faq-a-{{ instance }}-{{ question.id }}" class="answer">{{ question.answer|markdown }}</div>
+           {% else %}
+           <div id="faq-a-{{ instance }}-{{ question.id }}" class="answer" style="display:none;">{{ question.answer|markdown }}</div>
+           {% endif %}
+          {% endfor %}
+         {% endwith %}
+        {% endfor %}
+       </td>
+      </tr>
+     </table>
