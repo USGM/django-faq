@@ -1,6 +1,13 @@
 import os
 from setuptools import setup, find_packages
 
+def get_template_files():
+    matches = []
+    for root, dirnames, filenames in os.walk('faq/templates'):
+        matches.extend([os.path.join(root, filename) for filename in filenames])
+    print matches
+    return matches
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
@@ -28,5 +35,6 @@ setup(
     ],
     
     install_requires = ['setuptools', 'Django >= 1.3'],
-    test_suite = "faq._testrunner.runtests"
+    test_suite = "faq._testrunner.runtests",
+    data_files = [('faq/templates/faq', ['faq/templates/faq/faq_plugin.html'])]
 )
