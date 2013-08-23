@@ -8,7 +8,7 @@ from faq.models import Topic
 class FaqPlugin(CMSPluginBase):
     model = CMSPlugin
     name = _("FAQ")
-    render_template = "faq_plugin.html"
+    render_template = "faq/faq_plugin.html"
 
     def render(self, context, instance, placeholder):
         context.update({'topics': Topic.objects.all(),
