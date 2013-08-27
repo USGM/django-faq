@@ -1,6 +1,7 @@
 import datetime
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from managers import PreOrderedManager
 
 try:
     from django.contrib.auth import get_user_model
@@ -15,6 +16,8 @@ class Topic(models.Model):
     name = models.CharField(_('name'), max_length=150)
     sort_order = models.IntegerField(_('sort order'), default=0,
         help_text=_('The order you would like the topic to be displayed.'))
+
+    objects = PreOrderedManager()
 
     def get_absolute_url(self):
         return '/faq/' + self.slug
@@ -37,6 +40,8 @@ class Question(models.Model):
         
     sort_order = models.IntegerField(_('sort order'), default=0,
         help_text=_('The order you would like the question to be displayed.'))
+
+    objects = PreOrderedManager()
 
     class Meta:
         verbose_name = _("Frequent asked question")
